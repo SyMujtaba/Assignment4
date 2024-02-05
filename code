@@ -1,0 +1,112 @@
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <set>
+
+using namespace std;
+
+
+struct Edge {
+    int destination;
+    int weight;
+};
+
+// Function to perform Dijkstra's Algorithm
+void dijkstra(const vector<vector<Edge>>& graph, int start, int end) {
+    int numNodes = graph.size();
+
+    // store distances from the start node
+    vector<int> distance(numNodes, numeric_limits<int>::max());
+
+    // Set to keep track of visited nodes
+    set<int> visited;
+
+    // Vector to store the predecessor of each node on the shortest path
+    vector<int> previous(numNodes, -1);
+
+    // Initialize the distance of the start node to 0
+    distance[start] = 0;
+
+   
+    for (int i = 0; i < numNodes - 1; ++i) {
+        // Find the minimum distance vertex from the set of vertices not yet processed
+        int minVertex = -1;
+        for (int j = 0; j < numNodes; ++j) {
+            if (visited.find(j) == visited.end() && (minVertex == -1 || distance[j] < distance[minVertex])) {
+                minVertex = j;
+            }
+        }
+
+        // Mark the selected vertex as visited
+        visited.insert(minVertex);
+
+        // Update the distance value of the adjacent vertices
+        for (const Edge& edge : graph[minVertex]) {
+            if (visited.find(edge.destination) == visited.end() &&
+                distance[minVertex] + edge.weight < distance[edge.destination]) {
+                distance[edge.destination] = distance[minVertex] + edge.weight;
+                previous[edge.destination] = minVertex;
+            }
+        }
+    }
+
+    // Output 
+    cout << "Cost of the Shortest Path from Node " << start << " to Node " << end << ": " << distance[end] << endl;
+
+    
+    cout << "Shortest Path: ";
+    vector<int> path;
+    for (int current = end; current != -1; current = previous[current]) {
+        path.push_back(current);
+    }
+
+    for (int i = path.size() - 1; i >= 0; --i) {
+        cout << path[i];
+        if (i > 0) {
+            cout << " -> ";
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    int numNodes, numEdges;
+
+
+    cout << "Enter the number of nodes: ";
+    cin >> numNodes;
+    cout << "Enter the number of edges: ";
+    cin >> numEdges;
+
+    
+    vector<vector<Edge>> graph(numNodes);
+
+    cout << "Enter the edges and their weights (source destination weight):" << endl;
+    for (int i = 0; i < numEdges; ++i) {
+        int source, destination, weight;
+        cin >> source >> destination >> weight;
+
+        
+        graph[source].push_back({destination, weight});
+        graph[destination].push_back({source, weight});
+    }
+
+    int start, end;
+
+    
+    cout << "Enter the starting node: ";
+    cin >> start;
+    cout << "Enter the ending node: ";
+    cin >> end;
+
+    
+    if (start < 0 || start >= numNodes || end < 0 || end >= numNodes) {
+        cerr << "Invalid node indices. Exiting..." << endl;
+        return 1;
+    }
+
+    
+    dijkstra(graph, start, end);
+
+    return 0;
+}
